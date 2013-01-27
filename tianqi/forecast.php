@@ -3,13 +3,11 @@
   $city = '';
   $body = '<h3>城市代码不合法！</h3>';
 
-  if (isset($_GET['cid']) && strlen($_GET['cid'])==9 && ctype_digit($_GET['cid'])) {
-    $forecast = getforecast($_GET['cid']);
+  $forecast = getforecast('101040100');
     if ($forecast) {
       $city = $forecast['city'];
       $body = printbody($forecast);
     }
-  }
 
   function getforecast($cityid) {
     if (!function_exists('curl_init')) {
@@ -95,13 +93,14 @@
 
   function printbody($forecast) {
     function printdate($datetime) {
-      return date('n月j日', $datetime).' '.getday($datetime);
+      return getday($datetime).' '.date('n月j日', $datetime);
     }
     $date = getdatetime($forecast['date_y'], $forecast['fchh']);
     $images = getimageurl($forecast);
     $length = 7;
-    $body = "<ul>\n<li>".date('Y-m-d H时', $date)."发布</li><br />\n";
-
+    //$body = "<ul>\n<li>".date('Y-m-d H时', $date)."发布</li><br />\n";
+	//$body = "<ul>";
+    
     if ($forecast['fchh'] == '18') {
       $date += 86400;
       $forecast = fixforecast($forecast);
@@ -109,21 +108,12 @@
     }
 
     for ($i = 1; $i < $length; $i++) {
-      $body .= '<li>'.printdate($date)."<br />";
+      $body .= '<p>'.printdate($date)."&nbsp;&nbsp;&nbsp;";
       $body .= '<img src="'.$images[($i*2-1)].'" /><img src="'.$images[($i*2)]."\" /><br />";
-      $body .= "{$forecast["weather$i"]} {$forecast["temp$i"]}<br />{$forecast["wind$i"]}</li><br />\n";
+      $body .= "{$forecast["weather$i"]} {$forecast["temp$i"]}&nbsp;&nbsp;&nbsp;{$forecast["wind$i"]}</p><br />\n";
       $date += 86400;
     }
     return $body;
   }
 ?>
-<!doctype html>
-<html>
-<head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
-<title><?php echo $city; ?>天气预报</title>
-</head>
-<body>
-<?php echo $body; ?>
-</body>
-</html>
+<div><?php echo $body; ?></div>
